@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800;900&display=swap');
+
+* {
+  font-family: 'Noto Sans Arabic', sans-serif;
+}
+
+body {
+  font-family: 'Noto Sans Arabic', sans-serif;
+  line-height: 1.7;
+  color: #1e3527; /* morocco-900 */
+  background-color: #faf9f6; /* beige-50 */
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Base typography using Tailwind layers */
+@layer base {
+  h1, h2, h3, h4 {
+    @apply font-display text-morocco-900 tracking-tight;
+  }
+  h1 { @apply text-4xl md:text-6xl leading-[1.1]; }
+  h2 { @apply text-3xl md:text-4xl leading-tight; }
+  h3 { @apply text-2xl md:text-3xl leading-snug; }
+  p { @apply text-base md:text-lg text-morocco-800; }
+  a { @apply text-morocco-700 hover:text-morocco-900 transition-colors; }
+}
+
+/* Section title style with accent underline */
+.section-title {
+  @apply font-display text-morocco-900 font-extrabold tracking-tight;
+  position: relative;
+}
+.section-title::after {
+  content: '';
+  display: block;
+  width: 120px;
+  height: 6px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #d4af37 0%, #e8c038 50%, #f0d461 100%);
+  margin-top: 10px;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4A7C59;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #356341;
+}
+
+/* Animation utilities */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* Custom button hover effects */
+.btn-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(74, 124, 89, 0.2);
+}
+
+/* Gradient backgrounds */
+.bg-morocco-gradient {
+  background: linear-gradient(135deg, #4A7C59 0%, #356341 100%);
+}
+
+.text-shadow {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Mobile responsive improvements */
+@media (max-width: 768px) {
+  .hero-text {
+    font-size: 2.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.125rem;
+  }
+}
