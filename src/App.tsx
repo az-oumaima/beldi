@@ -9,6 +9,7 @@ import ContactSection from './sections/ContactSection';
 import CartModal from './components/CartModal';
 import CheckoutModal from './components/CheckoutModal';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
+import FloatingCart from './components/FloatingCart';
 
 const SHEETS_ENDPOINT = '';
 
@@ -144,6 +145,7 @@ function App() {
         )}
 
         <FloatingWhatsApp />
+        <FloatingCart onOpenCart={() => setIsCartOpen(true)} count={getTotalItems()} />
         </div>
     </div>
   );

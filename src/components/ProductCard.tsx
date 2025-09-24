@@ -30,13 +30,12 @@ export function ProductCard({
           className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
         />
       </div>
-      <div className="p-3 sm:p-4">
-        <h3 className="text-base sm:text-lg font-display text-morocco-900 mb-1">{product.name}</h3>
-        <div className="mb-3 text-morocco-700 font-bold text-base">
-          {selected.price} درهم / {selected.label}
-        </div>
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-xs text-morocco-800">الحجم</span>
+      <div className="p-3 sm:p-4 text-center">
+        <h3 className="text-base sm:text-lg font-display text-morocco-900 mb-2 flex items-baseline justify-center gap-2">
+          <span>{product.name}</span>
+          <span className="text-morocco-700 font-bold text-sm sm:text-base">{selected.price} درهم</span>
+        </h3>
+        <div className="flex items-center justify-center gap-2 mb-3">
           <div className="flex flex-wrap gap-1.5">
             {product.sizes.map(s => (
               <button
@@ -49,8 +48,7 @@ export function ProductCard({
             ))}
           </div>
         </div>
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-xs text-morocco-800">الكمية</span>
+        <div className="flex items-center justify-center gap-2 mb-3">
           <div className="flex items-center space-x-2 space-x-reverse">
             <button
               onClick={() => onChangeQty(qty - 1)}
