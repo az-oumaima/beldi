@@ -9,7 +9,7 @@ export function ContactSection() {
   const email = 'info@beldi.ma';
 
   return (
-    <section id="contact" className="pt-8 pb-12 bg-beige-100">
+    <section id="contact" className="relative pt-8 pb-16 bg-beige-100">
       <div className="container center-content">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
           {/* Swapped: Logo and socials moved to the right on md+ */}
@@ -43,6 +43,14 @@ export function ContactSection() {
             </div>
           </div>
         </div>
+        {/* Dashboard icon fixed to bottom inside section */}
+        <button
+          onClick={() => { window.location.hash = '#/dashboard'; }}
+          aria-label="Open dashboard"
+          className="absolute left-4 bottom-4 inline-flex items-center justify-center w-9 h-9 rounded-full bg-morocco-700 hover:bg-morocco-800 text-white shadow-lg"
+        >
+          <span className="text-sm">⚙️</span>
+        </button>
       </div>
     </section>
   );
