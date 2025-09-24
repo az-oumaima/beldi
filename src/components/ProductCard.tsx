@@ -31,17 +31,14 @@ export function ProductCard({
         />
       </div>
       <div className="p-3 sm:p-4 text-center">
-        <h3 className="text-base sm:text-lg font-display text-morocco-900 mb-2 flex items-baseline justify-center gap-2">
-          <span>{product.name}</span>
-          <span className="text-morocco-700 font-bold text-sm sm:text-base">{selected.price} درهم</span>
-        </h3>
+        <h3 className="text-base sm:text-lg font-display text-morocco-900 mb-3">{product.name}</h3>
         <div className="flex items-center justify-center gap-2 mb-3">
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1">
             {product.sizes.map(s => (
               <button
                 key={s.id}
                 onClick={() => onSelectSize(s.id)}
-                className={`px-2.5 py-1 rounded-full border text-xs ${selectedSizeId === s.id ? 'bg-morocco-700 text-white border-morocco-700' : 'border-beige-300 text-morocco-900 hover:bg-beige-100'}`}
+                className={`px-2 py-0.5 rounded-full border text-[11px] ${selectedSizeId === s.id ? 'bg-morocco-700 text-white border-morocco-700' : 'border-beige-300 text-morocco-900 hover:bg-beige-100'}`}
               >
                 {s.label}
               </button>
@@ -65,12 +62,15 @@ export function ProductCard({
             </button>
           </div>
         </div>
-        <button
-          onClick={onAdd}
-          className="w-full bg-morocco-700 text-white px-3 py-2 rounded-lg font-bold hover:bg-morocco-800 transition-colors text-sm"
-        >
-          أضف إلى السلة
-        </button>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-morocco-900 font-bold text-base">{selected.price} درهم</span>
+          <button
+            onClick={onAdd}
+            className="bg-morocco-700 text-white px-4 py-2 rounded-lg font-bold hover:bg-morocco-800 transition-colors text-sm flex-1"
+          >
+            أضف إلى السلة
+          </button>
+        </div>
       </div>
     </div>
   );

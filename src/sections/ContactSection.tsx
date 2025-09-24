@@ -29,7 +29,7 @@ export function ContactSection() {
           </div>
 
           {/* Swapped: Contact details moved to the left on md+ */}
-          <div className="md:order-1 mr-40 text-right">
+          <div className="md:order-1 md:mr-40 mr-0 text-right">
             <h2 className="text-3xl font-display text-morocco-900 mb-4">اتصل بنا</h2>
             <div className="space-y-3">
               <a href={phoneLink} className="flex items-center justify-between gap-3 rounded-lg border border-beige-300 bg-white px-3 py-2.5 hover:shadow-sm">
