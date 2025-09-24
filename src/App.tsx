@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { CartItem, Product } from './data/types';
 import { products as PRODUCT_DATA } from './data/products';
 import Header from './components/Header';
@@ -10,6 +10,7 @@ import CartModal from './components/CartModal';
 import CheckoutModal from './components/CheckoutModal';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
 import FloatingCart from './components/FloatingCart';
+import Toast, { type ToastType } from './components/Toast';
 
 const SHEETS_ENDPOINT = '';
 
@@ -17,6 +18,7 @@ function App() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [toast, setToast] = useState<{ open: boolean; message: string; type: ToastType }>({ open: false, message: '', type: 'success' });
   const [checkoutForm, setCheckoutForm] = useState({
     fullName: '',
     phone: '',
@@ -86,15 +88,23 @@ function App() {
         });
       }
       console.log('Order submitted:', orderPayload);
-    alert('تم إرسال طلبك بنجاح! سنتصل بك قريباً.');
+      setToast({ open: true, message: 'تم إرسال طلبك بنجاح! سنتصل بك قريباً.', type: 'success' });
       setCheckoutForm({ fullName: '', phone: '', city: '' });
     setCartItems([]);
     setIsCheckoutOpen(false);
     } catch (err) {
       console.error(err);
-      alert('حدث خطأ أثناء الإرسال. حاول مرة أخرى.');
+      setToast({ open: true, message: 'حدث خطأ أثناء الإرسال. حاول مرة أخرى.', type: 'error' });
     }
   };
+
+  useEffect(() => {
+    if (!toast.open) return;
+    const id = window.setTimeout(() => {
+      setToast(prev => ({ ...prev, open: false }));
+    }, 3500);
+    return () => window.clearTimeout(id);
+  }, [toast.open]);
 
   const scrollToProducts = () => {
     document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
@@ -146,6 +156,12 @@ function App() {
 
         <FloatingWhatsApp />
         <FloatingCart onOpenCart={() => setIsCartOpen(true)} count={getTotalItems()} />
+        <Toast
+          open={toast.open}
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(prev => ({ ...prev, open: false }))}
+        />
         </div>
     </div>
   );

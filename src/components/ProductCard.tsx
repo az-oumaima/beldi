@@ -62,11 +62,11 @@ export function ProductCard({
             </button>
           </div>
         </div>
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-morocco-900 font-bold text-base">{selected.price} درهم</span>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+          <span className="text-morocco-900 font-bold text-base text-center md:text-right">{selected.price} درهم</span>
           <button
             onClick={onAdd}
-            className="bg-morocco-700 text-white px-4 py-2 rounded-lg font-bold hover:bg-morocco-800 transition-colors text-sm flex-1"
+            className="bg-morocco-700 text-white px-4 py-2 rounded-lg font-bold hover:bg-morocco-800 transition-colors text-sm w-full md:flex-1"
           >
             أضف إلى السلة
           </button>
