@@ -9,7 +9,6 @@ import ContactSection from './sections/ContactSection';
 import CartModal from './components/CartModal';
 import CheckoutModal from './components/CheckoutModal';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
-import FloatingCart from './components/FloatingCart';
 import Toast, { type ToastType } from './components/Toast';
 import { addOrder } from './utils/orderStorage';
 import Dashboard from './pages/Dashboard';
@@ -230,7 +229,7 @@ function App() {
         )}
 
         <FloatingWhatsApp />
-        <FloatingCart onOpenCart={() => setIsCartOpen(true)} count={getTotalItems()} />
+        {/* <FloatingCart onOpenCart={() => setIsCartOpen(true)} count={getTotalItems()} /> */}
         <Toast
           open={toast.open}
           type={toast.type}

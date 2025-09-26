@@ -1,5 +1,6 @@
 import React from 'react';
 
+
 export function Hero({ onShopNow }: { onShopNow: () => void }) {
   return (
     <section id="home" className="relative py-20 md:py-28 bg-white">

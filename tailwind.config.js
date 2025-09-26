@@ -4,9 +4,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        'arabic': ['Noto Sans Arabic', 'sans-serif'],
-        'display': ['Cairo', 'Noto Sans Arabic', 'sans-serif'],
-        'sans': ['Noto Sans Arabic', 'Cairo', 'sans-serif']
+        'arabic': ['Cocon Next Arabic', 'sans-serif'],
+        'display': ['Cocon Next Arabic', 'sans-serif'],
+        'sans': ['Cocon Next Arabic', 'sans-serif']
       },
       colors: {
         'morocco': {

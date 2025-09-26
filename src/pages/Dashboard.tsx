@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getOrders, updateOrder, addOrder, deleteOrder } from '../utils/orderStorage';
+import { listOrders, createOrder, modifyOrder, removeOrder } from '../utils/orderService';
 import { products } from '../data/products';
 import { Edit3, X } from 'lucide-react';
+import type { OrderRecord } from '../utils/orderStorage';
 
 export default function Dashboard({ onToast }: { onToast?: (message: string, type: 'success' | 'error') => void }) {
   const [authed, setAuthed] = useState(false);
@@ -12,7 +13,16 @@ export default function Dashboard({ onToast }: { onToast?: (message: string, typ
   const [filterDelivered, setFilterDelivered] = useState<'all' | 'yes' | 'no'>('all');
 
   const [tick, setTick] = useState(0);
-  const orders = useMemo(() => getOrders(), [tick]);
+  const [orders, setOrders] = useState<OrderRecord[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const data = await listOrders();
+      if (!cancelled) setOrders(data);
+    })();
+    return () => { cancelled = true; };
+  }, [tick]);
   // Order edit mode state
   const [editOrderId, setEditOrderId] = useState<number | null>(null);
   const [editFullName, setEditFullName] = useState('');
@@ -43,7 +53,7 @@ export default function Dashboard({ onToast }: { onToast?: (message: string, typ
 
   const filtered = useMemo(() => {
     const s = q.toLowerCase();
-    return orders.filter(o => {
+    return orders.filter((o: OrderRecord) => {
       const matchQ = !s || o.fullName.toLowerCase().includes(s) || o.phone.toLowerCase().includes(s) || o.city.toLowerCase().includes(s) || String(o.id).includes(s);
       const matchC = filterConfirmed === 'all' || (filterConfirmed === 'yes' ? o.status.confirmed : !o.status.confirmed);
       const matchD = filterDelivered === 'all' || (filterDelivered === 'yes' ? o.status.delivered : !o.status.delivered);
@@ -65,9 +75,8 @@ export default function Dashboard({ onToast }: { onToast?: (message: string, typ
 
   const totalNew = useMemo(() => newItems.reduce((sum, it) => sum + (Number(it.unitPrice) || 0) * (Number(it.quantity) || 0), 0), [newItems]);
 
-  const submitNewOrder = (e: React.FormEvent) => {
+  const submitNewOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Build items in CartItem shape
     const items = newItems.filter(it => (it.productId || it.name) && it.quantity > 0).map(it => ({
       productId: it.productId || it.name,
       name: it.name,
@@ -78,7 +87,7 @@ export default function Dashboard({ onToast }: { onToast?: (message: string, typ
       quantity: Number(it.quantity) || 0,
     })) as any;
     const total = (items as any[]).reduce((s: number, it: any) => s + it.unitPrice * it.quantity, 0);
-    addOrder({
+    await createOrder({
       timestamp: new Date().toISOString(),
       fullName: newFullName,
       phone: newPhone,
@@ -96,13 +105,13 @@ export default function Dashboard({ onToast }: { onToast?: (message: string, typ
 
   // Enter edit mode for a specific order
   const startEditOrder = (orderId: number) => {
-    const o = orders.find(x => x.id === orderId);
+    const o = orders.find((x: OrderRecord) => x.id === orderId);
     if (!o) return;
     setEditOrderId(orderId);
     setEditFullName(o.fullName);
     setEditPhone(o.phone);
     setEditCity(o.city);
-    const mapped: NewItem[] = o.items.map(it => ({
+    const mapped: NewItem[] = o.items.map((it: OrderRecord['items'][number]) => ({
       productId: it.productId,
       name: it.name,
       quantity: it.quantity,
@@ -113,7 +122,7 @@ export default function Dashboard({ onToast }: { onToast?: (message: string, typ
     setEditItems(mapped.length ? mapped : [{ productId: '', name: '', quantity: 1, sizeId: '', sizeLabel: '', unitPrice: 0 }]);
   };
 
-  const saveEditOrder = (e: React.FormEvent) => {
+  const saveEditOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editOrderId == null) return;
     const items = editItems.filter(it => (it.productId || it.name) && it.quantity > 0).map(it => ({
@@ -126,7 +135,7 @@ export default function Dashboard({ onToast }: { onToast?: (message: string, typ
       quantity: Number(it.quantity) || 0,
     })) as any;
     const total = (items as any[]).reduce((s: number, it: any) => s + it.unitPrice * it.quantity, 0);
-    updateOrder(editOrderId, {
+    await modifyOrder(editOrderId, {
       fullName: editFullName,
       phone: editPhone,
       city: editCity,
@@ -213,7 +222,7 @@ export default function Dashboard({ onToast }: { onToast?: (message: string, typ
               </tr>
             </thead>
               <tbody>
-              {filtered.flatMap(o => {
+              {filtered.flatMap((o: OrderRecord) => {
                 const date = new Date(o.timestamp);
                 const dateStr = date.toLocaleDateString();
                 const timeStr = date.toLocaleTimeString();
@@ -236,8 +245,8 @@ export default function Dashboard({ onToast }: { onToast?: (message: string, typ
                       <td className="px-3 py-2"></td>
                       <td className="px-3 py-2"></td>
                       <td className="px-3 py-2">{o.total}</td>
-                      <td className="px-3 py-2"><input type="checkbox" checked={o.status.confirmed} onChange={e=>{updateOrder(o.id,{ status:{...o.status, confirmed:e.target.checked}}); setTick(t=>t+1);}} /></td>
-                      <td className="px-3 py-2"><input type="checkbox" checked={o.status.delivered} onChange={e=>{updateOrder(o.id,{ status:{...o.status, delivered:e.target.checked}}); setTick(t=>t+1);}} /></td>
+                      <td className="px-3 py-2"><input type="checkbox" checked={o.status.confirmed} onChange={async e=>{await modifyOrder(o.id,{ status:{...o.status, confirmed:e.target.checked}}); setTick(t=>t+1);}} /></td>
+                      <td className="px-3 py-2"><input type="checkbox" checked={o.status.delivered} onChange={async e=>{await modifyOrder(o.id,{ status:{...o.status, delivered:e.target.checked}}); setTick(t=>t+1);}} /></td>
                       <td className="px-3 py-2">
                         <div className="flex items-center gap-2">
                           <button onClick={()=> startEditOrder(o.id)} className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-beige-100 text-morocco-900 hover:bg-beige-200" title="تعديل">
@@ -246,7 +255,7 @@ export default function Dashboard({ onToast }: { onToast?: (message: string, typ
                           <button onClick={()=>{
                             setConfirmToast({
                               message: `هل تريد حذف الطلب #${o.id}؟`,
-                              onConfirm: () => { deleteOrder(o.id); setTick(t=>t+1); onToast?.('تم حذف الطلب', 'success'); }
+                              onConfirm: async () => { await removeOrder(o.id); setTick(t=>t+1); onToast?.('تم حذف الطلب', 'success'); }
                             });
                           }} className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-50 text-red-600 hover:bg-red-100" title="حذف">
                             <X className="w-4 h-4" />
@@ -256,7 +265,7 @@ export default function Dashboard({ onToast }: { onToast?: (message: string, typ
                     </tr>
                   );
                 }
-                return o.items.map((item, idx) => (
+                return o.items.map((item: OrderRecord['items'][number], idx: number) => (
                   <tr key={`${o.id}-${idx}`} className={`border-t transition-colors ${rowBg || 'hover:bg-beige-50'}`}>
                     <td className="px-3 py-2">{idx === 0 ? o.id : ''}</td>
                     <td className="px-3 py-2">{idx === 0 ? dateStr : ''}</td>
@@ -269,8 +278,8 @@ export default function Dashboard({ onToast }: { onToast?: (message: string, typ
                     <td className="px-3 py-2">{item.sizeLabel}</td>
                     <td className="px-3 py-2">{item.unitPrice}</td>
                     <td className="px-3 py-2">{idx === 0 ? o.total : ''}</td>
-                    <td className="px-3 py-2">{idx === 0 ? <input type="checkbox" checked={o.status.confirmed} onChange={e=>{updateOrder(o.id,{ status:{...o.status, confirmed:e.target.checked}}); setTick(t=>t+1);}} /> : ''}</td>
-                    <td className="px-3 py-2">{idx === 0 ? <input type="checkbox" checked={o.status.delivered} onChange={e=>{updateOrder(o.id,{ status:{...o.status, delivered:e.target.checked}}); setTick(t=>t+1);}} /> : ''}</td>
+                    <td className="px-3 py-2">{idx === 0 ? <input type="checkbox" checked={o.status.confirmed} onChange={async e=>{await modifyOrder(o.id,{ status:{...o.status, confirmed:e.target.checked}}); setTick(t=>t+1);}} /> : ''}</td>
+                    <td className="px-3 py-2">{idx === 0 ? <input type="checkbox" checked={o.status.delivered} onChange={async e=>{await modifyOrder(o.id,{ status:{...o.status, delivered:e.target.checked}}); setTick(t=>t+1);}} /> : ''}</td>
                     <td className="px-3 py-2">
                       {idx === 0 ? (
                       <div className="flex items-center gap-2">
@@ -280,7 +289,7 @@ export default function Dashboard({ onToast }: { onToast?: (message: string, typ
                           <button onClick={()=>{
                             setConfirmToast({
                               message: `هل تريد حذف الطلب #${o.id}؟`,
-                              onConfirm: () => { deleteOrder(o.id); setTick(t=>t+1); onToast?.('تم حذف الطلب', 'success'); }
+                              onConfirm: async () => { await removeOrder(o.id); setTick(t=>t+1); onToast?.('تم حذف الطلب', 'success'); }
                             });
                           }} className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-50 text-red-600 hover:bg-red-100" title="حذف">
                             <X className="w-4 h-4" />
@@ -291,10 +300,10 @@ export default function Dashboard({ onToast }: { onToast?: (message: string, typ
                           <button onClick={()=>{
                             setConfirmToast({
                               message: `حذف العنصر من الطلب #${o.id}؟`,
-                              onConfirm: () => {
-                                const newItems = o.items.filter((_, i) => i !== idx);
-                                const newTotal = newItems.reduce((s, it) => s + it.unitPrice * it.quantity, 0);
-                                updateOrder(o.id, { items: newItems, total: newTotal });
+                              onConfirm: async () => {
+                                const newItems = o.items.filter((_: OrderRecord['items'][number], i: number) => i !== idx);
+                                const newTotal = newItems.reduce((s: number, it: OrderRecord['items'][number]) => s + it.unitPrice * it.quantity, 0);
+                                await modifyOrder(o.id, { items: newItems as any, total: newTotal });
                                 setTick(t=>t+1);
                                 onToast?.('تم حذف العنصر من الطلب', 'success');
                               }
@@ -418,6 +427,8 @@ export default function Dashboard({ onToast }: { onToast?: (message: string, typ
                   <input type="number" step="0.01" value={it.unitPrice} disabled className="border border-beige-300 rounded-full px-4 py-2 outline-none bg-beige-100 text-morocco-800" />
                   <div className="flex items-center gap-2">
                     <button type="button" onClick={()=>removeNewItemRow(idx)} className="inline-flex items-center justify-center w-full h-10 rounded-full bg-red-50 text-red-600 hover:bg-red-100">×</button>
+                    <button type="button" onClick={addNewItemRow} className="bg-morocco-700 text-white rounded-full px-5 py-2 font-bold hover:bg-morocco-800">+</button>
+
                   </div>
                 </div>
               );
@@ -425,7 +436,6 @@ export default function Dashboard({ onToast }: { onToast?: (message: string, typ
           </div>
           <div className="mt-4">
             <div className="flex items-center gap-3">
-              <button type="button" onClick={addNewItemRow} className="bg-morocco-700 text-white rounded-full px-5 py-2 font-bold hover:bg-morocco-800">إضافة عنصر</button>
               <div className="flex-1 text-center text-morocco-900 font-bold">الإجمالي: {totalNew}</div>
               <button className="bg-gold-600 text-morocco-900 rounded-full px-8 py-2.5 font-bold hover:bg-gold-500 shadow">حفظ الطلب</button>
             </div>
@@ -447,5 +457,8 @@ export default function Dashboard({ onToast }: { onToast?: (message: string, typ
     </div>
   );
 }
+
+
+
 
 
